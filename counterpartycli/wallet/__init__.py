@@ -23,7 +23,7 @@ class LockedWalletError(WalletError):
     pass
 
 def WALLET():
-    return sys.modules['counterpartycli.wallet.{}'.format(config.WALLET_NAME)] 
+    return sys.modules['counterpartycli.wallet.{}'.format(config.WALLET_NAME)]
 
 def get_wallet_addresses():
     return WALLET().get_wallet_addresses()
@@ -108,7 +108,7 @@ def wallet():
 
     for bunch in get_btc_balances():
         address, btc_balance = bunch
-        add_total(address, 'BTC', btc_balance)
+        add_total(address, config.BTC, btc_balance)
         balances = api('get_balances', {'filters': [('address', '==', address),]})
         for balance in balances:
             asset = balance['asset']
@@ -125,7 +125,7 @@ def asset(asset_name):
         'supply': D(value_out(supply, asset_name)),
         'asset_id': asset_id
     }
-    if asset_name in ['XCP', 'BTC']:
+    if asset_name in [config.XCP, config.BTC]:
         asset_info.update({
             'owner': None,
             'divisible': True,
@@ -135,10 +135,10 @@ def asset(asset_name):
         })
     else:
         issuances = api('get_issuances', {
-            'filters': [('asset', '==', asset_name),], 
-            'status': 'valid', 
-            'order_by': 'tx_index', 
-            'order_dir': 'DESC', 
+            'filters': [('asset', '==', asset_name),],
+            'status': 'valid',
+            'order_by': 'tx_index',
+            'order_dir': 'DESC',
         })
         if not issuances:
             raise WalletError('Asset not found')
@@ -160,7 +160,7 @@ def asset(asset_name):
 
     for bunch in get_btc_balances():
         address, btc_balance = bunch
-        if asset_name == 'BTC':
+        if asset_name == config.BTC:
             balance = btc_balance
         else:
             balances = api('get_balances', {'filters': [('address', '==', address), ('asset', '==', asset_name)]})
@@ -175,7 +175,7 @@ def asset(asset_name):
 
     addresses = list(asset_info['addresses'].keys())
 
-    if asset_name != 'BTC':
+    if asset_name != config.BTC:
         all_sends = api('get_sends',  {'filters': [('source', 'IN', addresses), ('destination', 'IN', addresses)], 'filterop': 'OR', 'status': 'valid'})
         sends = []
         for send in all_sends:
@@ -195,7 +195,7 @@ def asset(asset_name):
 
 def balances(address):
     result = {
-        'BTC': get_btc_balance(address)
+        config.BTC: get_btc_balance(address)
     }
     balances = api('get_balances', {'filters': [('address', '==', address),]})
     for balance in balances:
